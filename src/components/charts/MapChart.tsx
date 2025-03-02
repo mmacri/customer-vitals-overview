@@ -4,10 +4,6 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { scaleLinear } from "d3-scale";
 import { formatCurrency } from "@/utils/formatters";
 
-// Add react-simple-maps for map visualizations
-<lov-add-dependency>react-simple-maps@^3.0.0</lov-add-dependency>
-<lov-add-dependency>d3-scale@^4.0.2</lov-add-dependency>
-
 // World map topojson
 const worldGeoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
 // US states topojson
