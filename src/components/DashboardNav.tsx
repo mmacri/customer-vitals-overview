@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Users, BarChart3, HeartPulse, AlarmClock, MessageSquare } from 'lucide-react';
+import { User, Users, BarChart3, HeartPulse, AlarmClock, MessageSquare, Package, Ticket, Building } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface DashboardNavProps {
@@ -13,9 +13,10 @@ interface DashboardNavProps {
 const DashboardNav = ({ activeView, onViewChange, userType }: DashboardNavProps) => {
   const internalViews = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'customers', label: 'Customers', icon: Building },
     { id: 'health', label: 'Customer Health', icon: HeartPulse },
     { id: 'escalations', label: 'Escalations', icon: AlarmClock },
-    { id: 'usage', label: 'Product Usage', icon: BarChart3 },
+    { id: 'usage', label: 'Product Usage', icon: Package },
     { id: 'implementation', label: 'Implementation', icon: Users },
     { id: 'metrics', label: 'CS Metrics', icon: BarChart3 },
   ];
@@ -23,8 +24,10 @@ const DashboardNav = ({ activeView, onViewChange, userType }: DashboardNavProps)
   const customerViews = [
     { id: 'customer-overview', label: 'Overview', icon: BarChart3 },
     { id: 'adoption', label: 'Adoption', icon: BarChart3 },
-    { id: 'blockers', label: 'Blockers', icon: AlarmClock },
+    { id: 'products', label: 'Your Products', icon: Package },
+    { id: 'tickets', label: 'Support Tickets', icon: Ticket },
     { id: 'escalations', label: 'Escalations', icon: MessageSquare },
+    { id: 'team', label: 'Account Team', icon: Users },
     { id: 'kpis', label: 'KPIs', icon: HeartPulse },
   ];
 

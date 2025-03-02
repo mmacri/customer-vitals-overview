@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import DashboardHeader from '@/components/DashboardHeader';
 import MetricCard from '@/components/MetricCard';
@@ -9,6 +8,8 @@ import DashboardNav from '@/components/DashboardNav';
 import UserTypeSwitch from '@/components/UserTypeSwitch';
 import CustomerHealthCard from '@/components/CustomerHealthCard';
 import CustomerMetricsCard from '@/components/CustomerMetricsCard';
+import CustomerFilter from '@/components/CustomerFilter';
+import CustomerAccountDetails from '@/components/CustomerAccountDetails';
 import { generateMockData, mockDashboardData } from '@/utils/mockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
@@ -151,6 +152,8 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState<'internal' | 'customer'>('internal');
   const [activeView, setActiveView] = useState('overview');
+  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+  const [selectedSalesRep, setSelectedSalesRep] = useState<string | null>(null);
 
   // Handle date range change
   const handleDateChange = (startDate: Date, endDate: Date) => {
@@ -220,6 +223,13 @@ const Index = () => {
     // Internal team views
     if (userType === 'internal') {
       switch (activeView) {
+        case 'customers':
+          return (
+            <div>
+              <CustomerAccountDetails customerId={selectedCustomer || undefined} />
+            </div>
+          );
+          
         case 'health':
           return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -415,6 +425,11 @@ const Index = () => {
     // Customer views
     else {
       switch (activeView) {
+        case 'products':
+          return (
+            <CustomerAccountDetails customerId={selectedCustomer || undefined} />
+          );
+          
         case 'adoption':
           return (
             <div className="space-y-6">
@@ -440,6 +455,85 @@ const Index = () => {
             </div>
           );
         
+        case 'team':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold">Your Account Team</h2>
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="space-y-4">
+                  {mockCustomerAccount.accountTeam.map((member) => (
+                    <div key={member.id} className="flex items-start p-3 border rounded-lg">
+                      <div className="bg-primary/10 rounded-full p-2 mr-3">
+                        <User className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium">{member.name}</h4>
+                        <p className="text-sm text-muted-foreground">{member.role}</p>
+                        <div className="flex items-center mt-2 text-sm">
+                          <Mail className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                          <span className="text-muted-foreground">{member.email}</span>
+                        </div>
+                        <div className="flex items-center mt-1 text-sm">
+                          <Phone className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                          <span className="text-muted-foreground">{member.phone}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+          
+        case 'tickets':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold">Your Support Tickets</h2>
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Updated</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockCustomerAccount.supportTickets.map((ticket) => (
+                      <TableRow key={ticket.id}>
+                        <TableCell className="font-medium">{ticket.id}</TableCell>
+                        <TableCell>{ticket.title}</TableCell>
+                        <TableCell>
+                          <Badge className={
+                            ticket.priority.toLowerCase() === 'high' ? 'bg-red-100 text-red-800 hover:bg-red-200' :
+                            ticket.priority.toLowerCase() === 'medium' ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
+                            'bg-green-100 text-green-800 hover:bg-green-200'
+                          }>
+                            {ticket.priority}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={
+                            ticket.status.toLowerCase() === 'open' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
+                            ticket.status.toLowerCase() === 'in progress' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' :
+                            'bg-green-100 text-green-800 hover:bg-green-200'
+                          }>
+                            {ticket.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{ticket.created}</TableCell>
+                        <TableCell>{ticket.updated}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          );
+          
         case 'kpis':
           return (
             <div className="space-y-6">
@@ -551,12 +645,21 @@ const Index = () => {
       <div className="max-w-screen-2xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <DashboardHeader 
-            title={userType === 'internal' ? "Customer Success Dashboard 2017" : "Your Success Dashboard"}
+            title={userType === 'internal' ? "Customer Success Dashboard" : "Your Success Dashboard"}
             dateRange={dashboardData.dateRange}
             onDateChange={handleDateChange}
           />
           <UserTypeSwitch userType={userType} onUserTypeChange={setUserType} />
         </div>
+        
+        {userType === 'internal' && (
+          <CustomerFilter 
+            selectedCustomer={selectedCustomer}
+            selectedSalesRep={selectedSalesRep}
+            onCustomerChange={setSelectedCustomer}
+            onSalesRepChange={setSelectedSalesRep}
+          />
+        )}
         
         <DashboardNav 
           activeView={activeView} 

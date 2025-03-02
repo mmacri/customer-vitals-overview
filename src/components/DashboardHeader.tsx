@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
-import { ChevronDown, Calendar } from 'lucide-react';
+import { ChevronDown, Calendar, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { formatDate } from '@/utils/formatters';
+import { Input } from '@/components/ui/input';
 
 interface DashboardHeaderProps {
   title: string;
