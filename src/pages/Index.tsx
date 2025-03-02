@@ -12,7 +12,114 @@ import CustomerFilter from '@/components/CustomerFilter';
 import CustomerAccountDetails from '@/components/CustomerAccountDetails';
 import { generateMockData, mockDashboardData } from '@/utils/mockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { User, Mail, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+// Mock customer account data
+const mockCustomerAccount = {
+  accountTeam: [
+    { 
+      id: '1', 
+      name: 'John Smith', 
+      role: 'Customer Success Manager',
+      email: 'john.smith@company.com',
+      phone: '(555) 123-4567'
+    },
+    { 
+      id: '2', 
+      name: 'Emily Davis', 
+      role: 'Technical Account Manager',
+      email: 'emily.davis@company.com',
+      phone: '(555) 234-5678'
+    },
+    { 
+      id: '3', 
+      name: 'Michael Brown', 
+      role: 'Solutions Engineer',
+      email: 'michael.brown@company.com',
+      phone: '(555) 345-6789'
+    }
+  ],
+  supportTickets: [
+    { 
+      id: 'TICK-1234', 
+      title: 'Integration with CRM not working', 
+      priority: 'High',
+      status: 'Open',
+      created: '2023-06-15',
+      updated: '2023-06-16'
+    },
+    { 
+      id: 'TICK-1235', 
+      title: 'User permissions issue', 
+      priority: 'Medium',
+      status: 'In Progress',
+      created: '2023-06-10',
+      updated: '2023-06-14'
+    },
+    { 
+      id: 'TICK-1236', 
+      title: 'Report data inaccuracy', 
+      priority: 'Low',
+      status: 'Closed',
+      created: '2023-05-28',
+      updated: '2023-06-02'
+    },
+    { 
+      id: 'TICK-1237', 
+      title: 'Dashboard loading slowly', 
+      priority: 'Medium',
+      status: 'Open',
+      created: '2023-06-14',
+      updated: '2023-06-14'
+    }
+  ],
+  products: [
+    {
+      id: '1',
+      name: 'Core Platform',
+      status: 'Active',
+      usageTarget: 90,
+      currentUsage: 85
+    },
+    {
+      id: '2',
+      name: 'Analytics Suite',
+      status: 'Active',
+      usageTarget: 75,
+      currentUsage: 68
+    },
+    {
+      id: '3',
+      name: 'Integration Platform',
+      status: 'Implementation',
+      usageTarget: 60,
+      currentUsage: 25
+    }
+  ],
+  escalations: [
+    {
+      id: 'ESC-001',
+      title: 'API Performance Issue',
+      priority: 'High',
+      status: 'In Progress',
+      assignedTo: 'Emily Davis',
+      created: '2023-06-10',
+      updated: '2023-06-15'
+    },
+    {
+      id: 'ESC-002',
+      title: 'Data Migration Blocker',
+      priority: 'Critical',
+      status: 'Open',
+      assignedTo: 'Michael Brown',
+      created: '2023-06-16',
+      updated: '2023-06-16'
+    }
+  ]
+};
 
 // Mock customer health data
 const mockCustomerHealth = [
@@ -327,7 +434,7 @@ const Index = () => {
                     label={dashboardData.upsellCustomers.label}
                     mrrChange={dashboardData.upsellCustomers.mrrChange}
                     mrrValue={dashboardData.upsellCustomers.mrrValue}
-                    arrValue={dashboardData.upsellCustomers.arrValue}
+                    arrValue={dashboardData.arrValue}
                   />
                 </motion.div>
                 
