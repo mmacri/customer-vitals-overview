@@ -38,13 +38,13 @@ const MetricCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
-      className={`data-card p-4 ${isMainCard ? 'bg-white' : ''}`}
+      className={`data-card p-4 ${isMainCard ? 'bg-white rounded-lg shadow-sm' : ''}`}
     >
       {isMainCard ? (
         <div className="flex flex-col items-start">
           <h3 className="text-lg font-semibold text-gray-700 mb-2">{title}</h3>
           <div className="flex items-baseline gap-2">
-            <span className="metric-value">{formatNumber(count)}</span>
+            <span className="text-3xl font-bold">{formatNumber(count)}</span>
             {trend !== 0 && (
               <div className={`flex items-center ${trendClass} text-sm font-medium`}>
                 {trend > 0 ? <ArrowUp className="h-4 w-4 mr-1" /> : <ArrowDown className="h-4 w-4 mr-1" />}
@@ -59,7 +59,7 @@ const MetricCard = ({
             <div className="flex items-center gap-1">
               <span className="font-medium text-2xl">{count}</span>
             </div>
-            <span className="metric-label whitespace-nowrap">#{label}</span>
+            <span className="text-sm text-muted-foreground">{label}</span>
           </div>
           
           <div className="flex flex-col">
@@ -67,21 +67,21 @@ const MetricCard = ({
               {mrrChange && mrrChange > 0 && '+'}
               {mrrChange && formatPercentage(mrrChange)}
             </div>
-            <span className="metric-label">MRR Change</span>
+            <span className="text-sm text-muted-foreground">MRR Change</span>
           </div>
           
           <div className="flex flex-col">
             <div className="font-medium text-2xl">
-              {mrrValue && formatCurrency(mrrValue, 2)}
+              {mrrValue && formatCurrency(mrrValue, 0)}
             </div>
-            <span className="metric-label">{label} MRR $</span>
+            <span className="text-sm text-muted-foreground">{label} MRR</span>
           </div>
           
           <div className="flex flex-col">
             <div className="font-medium text-2xl">
-              {arrValue && formatCurrency(arrValue, 2)}
+              {arrValue && formatCurrency(arrValue, 0)}
             </div>
-            <span className="metric-label">{label} ARR $</span>
+            <span className="text-sm text-muted-foreground">{label} ARR</span>
           </div>
         </div>
       )}

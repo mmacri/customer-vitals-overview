@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import DashboardHeader from '@/components/DashboardHeader';
 import MetricCard from '@/components/MetricCard';
@@ -14,8 +15,9 @@ import { generateMockData, mockDashboardData } from '@/utils/mockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Phone } from 'lucide-react';
+import { User, Mail, Phone, PieChart } from 'lucide-react';
 import { motion } from 'framer-motion';
+import CustomerMetricsSummary from '@/components/CustomerMetricsSummary';
 
 // Mock customer account data
 const mockCustomerAccount = {
@@ -314,6 +316,14 @@ const Index = () => {
     }
   };
 
+  // Prepare data for customer metrics pie chart
+  const customerMetricsPieData = [
+    { name: 'New', value: dashboardData.newCustomers.arrValue, color: '#22c55e' },
+    { name: 'Upsell', value: dashboardData.upsellCustomers.arrValue, color: '#3b82f6' },
+    { name: 'Downgrade', value: Math.abs(dashboardData.downgradeCustomers.arrValue), color: '#f97316' },
+    { name: 'Churn', value: Math.abs(dashboardData.churnCustomers.arrValue), color: '#ef4444' }
+  ];
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -400,7 +410,7 @@ const Index = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-4 gap-6"
+                className="grid grid-cols-1 gap-6"
               >
                 <motion.div variants={itemVariants} className="md:col-span-4">
                   <MetricCard 
@@ -410,61 +420,14 @@ const Index = () => {
                   />
                 </motion.div>
                 
-                <motion.div variants={itemVariants} className="data-card p-4 md:col-span-1 bg-green-50">
-                  <div className="mb-2">
-                    <h2 className="text-xl font-semibold">New</h2>
-                  </div>
-                  <MetricCard 
-                    title=""
-                    count={dashboardData.newCustomers.count} 
-                    label={dashboardData.newCustomers.label}
-                    mrrChange={dashboardData.newCustomers.mrrChange}
-                    mrrValue={dashboardData.newCustomers.mrrValue}
-                    arrValue={dashboardData.newCustomers.arrValue}
-                  />
-                </motion.div>
-                
-                <motion.div variants={itemVariants} className="data-card p-4 md:col-span-1 bg-blue-50">
-                  <div className="mb-2">
-                    <h2 className="text-xl font-semibold">Upsell</h2>
-                  </div>
-                  <MetricCard 
-                    title=""
-                    count={dashboardData.upsellCustomers.count} 
-                    label={dashboardData.upsellCustomers.label}
-                    mrrChange={dashboardData.upsellCustomers.mrrChange}
-                    mrrValue={dashboardData.upsellCustomers.mrrValue}
-                    arrValue={dashboardData.upsellCustomers.arrValue}
-                  />
-                </motion.div>
-                
-                <motion.div variants={itemVariants} className="data-card p-4 md:col-span-1 bg-orange-50">
-                  <div className="mb-2">
-                    <h2 className="text-xl font-semibold">Downgrade</h2>
-                  </div>
-                  <MetricCard 
-                    title=""
-                    count={dashboardData.downgradeCustomers.count} 
-                    label={dashboardData.downgradeCustomers.label}
-                    mrrChange={dashboardData.downgradeCustomers.mrrChange}
-                    mrrValue={dashboardData.downgradeCustomers.mrrValue}
-                    arrValue={dashboardData.downgradeCustomers.arrValue}
-                  />
-                </motion.div>
-                
-                <motion.div variants={itemVariants} className="data-card p-4 md:col-span-1 bg-red-50">
-                  <div className="mb-2">
-                    <h2 className="text-xl font-semibold">Churn</h2>
-                  </div>
-                  <MetricCard 
-                    title=""
-                    count={dashboardData.churnCustomers.count} 
-                    label={dashboardData.churnCustomers.label}
-                    mrrChange={dashboardData.churnCustomers.mrrChange}
-                    mrrValue={dashboardData.churnCustomers.mrrValue}
-                    arrValue={dashboardData.churnCustomers.arrValue}
-                  />
-                </motion.div>
+                {/* Customer Metrics Summary Component */}
+                <CustomerMetricsSummary 
+                  newCustomers={dashboardData.newCustomers}
+                  upsellCustomers={dashboardData.upsellCustomers}
+                  downgradeCustomers={dashboardData.downgradeCustomers}
+                  churnCustomers={dashboardData.churnCustomers}
+                  pieChartData={customerMetricsPieData}
+                />
               </motion.div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
