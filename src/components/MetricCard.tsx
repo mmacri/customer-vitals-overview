@@ -8,9 +8,6 @@ import {
   getTrendClass 
 } from '@/utils/formatters';
 
-// Add framer-motion package for animations
-<lov-add-dependency>framer-motion@^10.16.4</lov-add-dependency>
-
 interface MetricCardProps {
   title: string;
   count: number;
