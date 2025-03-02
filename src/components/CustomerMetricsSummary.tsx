@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { formatCurrency, formatPercentage } from '@/utils/formatters';
@@ -44,6 +43,8 @@ interface CustomerMetricsSummaryProps {
     value: number;
     color: string;
   }[];
+  onFilterChange?: (filter: string | null) => void;
+  activeFilter: string | null;
 }
 
 const CustomerMetricsSummary: React.FC<CustomerMetricsSummaryProps> = ({
@@ -51,7 +52,9 @@ const CustomerMetricsSummary: React.FC<CustomerMetricsSummaryProps> = ({
   upsellCustomers,
   downgradeCustomers,
   churnCustomers,
-  pieChartData
+  pieChartData,
+  onFilterChange,
+  activeFilter
 }) => {
   // Calculate percentages for the pie chart
   const totalValue = pieChartData.reduce((sum, item) => sum + item.value, 0);
@@ -78,6 +81,23 @@ const CustomerMetricsSummary: React.FC<CustomerMetricsSummaryProps> = ({
     );
   };
 
+  // Handle pie segment clicks
+  const handlePieClick = (data: any, index: number) => {
+    const clickedSegment = data.name;
+    if (activeFilter === clickedSegment) {
+      // If already selected, deselect it
+      onFilterChange?.(null);
+    } else {
+      // Otherwise, select it
+      onFilterChange?.(clickedSegment);
+    }
+  };
+
+  // Determine if a card should be highlighted based on the active filter
+  const isCardHighlighted = (cardType: string) => {
+    return activeFilter === cardType || activeFilter === null;
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       {/* Chart showing percentage breakdown */}
@@ -87,7 +107,17 @@ const CustomerMetricsSummary: React.FC<CustomerMetricsSummaryProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <h3 className="text-lg font-semibold mb-4">Customer Distribution</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          Customer Distribution
+          {activeFilter && (
+            <button 
+              onClick={() => onFilterChange?.(null)} 
+              className="ml-2 text-sm text-primary hover:underline"
+            >
+              (Clear Filter)
+            </button>
+          )}
+        </h3>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -100,17 +130,40 @@ const CustomerMetricsSummary: React.FC<CustomerMetricsSummaryProps> = ({
                 paddingAngle={2}
                 dataKey="value"
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                onClick={handlePieClick}
+                cursor="pointer"
               >
                 {pieChartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={entry.color} 
+                    opacity={activeFilter === null || activeFilter === entry.name ? 1 : 0.4}
+                    stroke={activeFilter === entry.name ? "#000" : "none"}
+                    strokeWidth={activeFilter === entry.name ? 2 : 0}
+                  />
                 ))}
               </Pie>
               <Tooltip
                 formatter={(value: number) => [formatCurrency(value), 'ARR']}
               />
-              <Legend formatter={(value, entry, index) => {
-                return `${value}: ${formatPercentage(pieChartData[index!].value / totalValue)}`;
-              }} />
+              <Legend 
+                formatter={(value, entry, index) => {
+                  const percentage = pieChartData[index!].value / totalValue;
+                  return (
+                    <span 
+                      style={{ 
+                        color: activeFilter === null || activeFilter === value ? '#000' : '#aaa',
+                        fontWeight: activeFilter === value ? 'bold' : 'normal',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => handlePieClick({ name: value }, index!)}
+                    >
+                      {value}: {formatPercentage(percentage)}
+                    </span>
+                  );
+                }}
+                onClick={(data) => handlePieClick(data, pieChartData.findIndex(item => item.name === data.value))}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -122,7 +175,8 @@ const CustomerMetricsSummary: React.FC<CustomerMetricsSummaryProps> = ({
         initial="initial" 
         animate="animate" 
         transition={{ delay: 0.3 }}
-        className="bg-green-50 rounded-lg p-4"
+        className={`bg-green-50 rounded-lg p-4 ${isCardHighlighted('New') ? 'ring-2 ring-green-500' : 'opacity-80'}`}
+        style={{ opacity: isCardHighlighted('New') ? 1 : 0.7 }}
       >
         <h3 className="text-xl font-semibold mb-3">New</h3>
         <div className="space-y-2">
@@ -159,7 +213,8 @@ const CustomerMetricsSummary: React.FC<CustomerMetricsSummaryProps> = ({
         initial="initial" 
         animate="animate" 
         transition={{ delay: 0.4 }}
-        className="bg-blue-50 rounded-lg p-4"
+        className={`bg-blue-50 rounded-lg p-4 ${isCardHighlighted('Upsell') ? 'ring-2 ring-blue-500' : 'opacity-80'}`}
+        style={{ opacity: isCardHighlighted('Upsell') ? 1 : 0.7 }}
       >
         <h3 className="text-xl font-semibold mb-3">Upsell</h3>
         <div className="space-y-2">
@@ -196,7 +251,8 @@ const CustomerMetricsSummary: React.FC<CustomerMetricsSummaryProps> = ({
         initial="initial" 
         animate="animate" 
         transition={{ delay: 0.5 }}
-        className="bg-orange-50 rounded-lg p-4"
+        className={`bg-orange-50 rounded-lg p-4 ${isCardHighlighted('Downgrade') ? 'ring-2 ring-orange-500' : 'opacity-80'}`}
+        style={{ opacity: isCardHighlighted('Downgrade') ? 1 : 0.7 }}
       >
         <h3 className="text-xl font-semibold mb-3">Downgrade</h3>
         <div className="space-y-2">
@@ -233,7 +289,8 @@ const CustomerMetricsSummary: React.FC<CustomerMetricsSummaryProps> = ({
         initial="initial" 
         animate="animate" 
         transition={{ delay: 0.6 }}
-        className="bg-red-50 rounded-lg p-4"
+        className={`bg-red-50 rounded-lg p-4 ${isCardHighlighted('Churn') ? 'ring-2 ring-red-500' : 'opacity-80'}`}
+        style={{ opacity: isCardHighlighted('Churn') ? 1 : 0.7 }}
       >
         <h3 className="text-xl font-semibold mb-3">Churn</h3>
         <div className="space-y-2">

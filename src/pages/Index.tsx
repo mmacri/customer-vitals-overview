@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import DashboardHeader from '@/components/DashboardHeader';
 import MetricCard from '@/components/MetricCard';
 import DataTable from '@/components/DataTable';
@@ -11,13 +10,14 @@ import CustomerHealthCard from '@/components/CustomerHealthCard';
 import CustomerMetricsCard from '@/components/CustomerMetricsCard';
 import CustomerFilter from '@/components/CustomerFilter';
 import CustomerAccountDetails from '@/components/CustomerAccountDetails';
+import CustomerMetricsSummary from '@/components/CustomerMetricsSummary';
+import CustomerHealthRenewalMetrics from '@/components/CustomerHealthRenewalMetrics';
 import { generateMockData, mockDashboardData } from '@/utils/mockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { User, Mail, Phone, PieChart } from 'lucide-react';
 import { motion } from 'framer-motion';
-import CustomerMetricsSummary from '@/components/CustomerMetricsSummary';
 
 // Mock customer account data
 const mockCustomerAccount = {
@@ -256,6 +256,64 @@ const mockMetricsData = {
   }
 };
 
+// Mock customer health and renewal data by time period
+const mockCustomersByTimePeriod = [
+  {
+    period: 'This Quarter',
+    healthy: 480,
+    neutral: 220,
+    atRisk: 95,
+    renewed: 180,
+    lost: 35,
+    total: 795
+  },
+  {
+    period: 'Next Quarter',
+    healthy: 520,
+    neutral: 190,
+    atRisk: 75,
+    renewed: 210,
+    lost: 30,
+    total: 785
+  },
+  {
+    period: 'Last Quarter',
+    healthy: 450,
+    neutral: 230,
+    atRisk: 110,
+    renewed: 160,
+    lost: 45,
+    total: 790
+  },
+  {
+    period: 'Last 6 Months',
+    healthy: 915,
+    neutral: 440,
+    atRisk: 195,
+    renewed: 330,
+    lost: 72,
+    total: 1550
+  },
+  {
+    period: 'Fiscal Year',
+    healthy: 1850,
+    neutral: 820,
+    atRisk: 380,
+    renewed: 640,
+    lost: 140,
+    total: 3050
+  },
+  {
+    period: 'YTD',
+    healthy: 1520,
+    neutral: 680,
+    atRisk: 305,
+    renewed: 510,
+    lost: 115,
+    total: 2505
+  }
+];
+
 const Index = () => {
   const [dashboardData, setDashboardData] = useState(mockDashboardData);
   const [loading, setLoading] = useState(true);
@@ -263,6 +321,12 @@ const Index = () => {
   const [activeView, setActiveView] = useState('overview');
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [selectedSalesRep, setSelectedSalesRep] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  // Handle filter change from pie chart selection
+  const handleFilterChange = (filter: string | null) => {
+    setActiveFilter(filter);
+  };
 
   // Handle date range change
   const handleDateChange = (startDate: Date, endDate: Date) => {
@@ -277,13 +341,40 @@ const Index = () => {
     }, 800);
   };
 
+  // Filter data based on active filter
+  const filteredData = useMemo(() => {
+    if (!activeFilter) return dashboardData;
+
+    // Create a copy of the dashboard data to modify
+    const filtered = {...dashboardData};
+    
+    // Filter tables based on the selected segment
+    if (activeFilter === 'New') {
+      // Only show new customer data
+      filtered.upsells = [];
+      filtered.downgrades = [];
+    } else if (activeFilter === 'Upsell') {
+      // Only show upsell data
+      filtered.downgrades = [];
+    } else if (activeFilter === 'Downgrade') {
+      // Only show downgrade data
+      filtered.upsells = [];
+    } else if (activeFilter === 'Churn') {
+      // Don't show upsells or downgrades for churned customers
+      filtered.upsells = [];
+      filtered.downgrades = [];
+    }
+
+    return filtered;
+  }, [dashboardData, activeFilter]);
+
   // Format map data for the charts
-  const countryMapData = dashboardData.arrByCountry.reduce((acc, { country, value }) => {
+  const countryMapData = filteredData.arrByCountry.reduce((acc, { country, value }) => {
     acc[country] = value;
     return acc;
   }, {} as { [key: string]: number });
 
-  const stateMapData = dashboardData.arrByState.reduce((acc, { state, value }) => {
+  const stateMapData = filteredData.arrByState.reduce((acc, { state, value }) => {
     acc[state] = value;
     return acc;
   }, {} as { [key: string]: number });
@@ -323,6 +414,10 @@ const Index = () => {
     { name: 'Downgrade', value: Math.abs(dashboardData.downgradeCustomers.arrValue), color: '#f97316' },
     { name: 'Churn', value: Math.abs(dashboardData.churnCustomers.arrValue), color: '#ef4444' }
   ];
+
+  // Get total customers and trend
+  const totalCustomers = 4825; // Total customer count
+  const totalCustomersTrend = 0.087; // 8.7% growth
 
   if (loading) {
     return (
@@ -412,13 +507,13 @@ const Index = () => {
                 animate="visible"
                 className="grid grid-cols-1 gap-6"
               >
-                <motion.div variants={itemVariants} className="md:col-span-4">
-                  <MetricCard 
-                    title="Paying Customers" 
-                    count={dashboardData.payingCustomers.count} 
-                    trend={dashboardData.payingCustomers.trend}
-                  />
-                </motion.div>
+                {/* Customer Health & Renewal Metrics */}
+                <CustomerHealthRenewalMetrics 
+                  totalCustomers={totalCustomers}
+                  totalCustomersTrend={totalCustomersTrend}
+                  customersByTimePeriod={mockCustomersByTimePeriod}
+                  filter={activeFilter}
+                />
                 
                 {/* Customer Metrics Summary Component */}
                 <CustomerMetricsSummary 
@@ -427,6 +522,8 @@ const Index = () => {
                   downgradeCustomers={dashboardData.downgradeCustomers}
                   churnCustomers={dashboardData.churnCustomers}
                   pieChartData={customerMetricsPieData}
+                  onFilterChange={handleFilterChange}
+                  activeFilter={activeFilter}
                 />
               </motion.div>
               
@@ -435,16 +532,24 @@ const Index = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
+                  style={{ opacity: !activeFilter || activeFilter === 'Upsell' ? 1 : 0.5 }}
                 >
-                  <DataTable data={dashboardData.upsells} title="Upsells" />
+                  <DataTable 
+                    data={filteredData.upsells} 
+                    title={activeFilter ? `${activeFilter} - Upsells` : "Upsells"} 
+                  />
                 </motion.div>
                 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 }}
+                  style={{ opacity: !activeFilter || activeFilter === 'Downgrade' ? 1 : 0.5 }}
                 >
-                  <DataTable data={dashboardData.downgrades} title="Downgrades" />
+                  <DataTable 
+                    data={filteredData.downgrades} 
+                    title={activeFilter ? `${activeFilter} - Downgrades` : "Downgrades"} 
+                  />
                 </motion.div>
               </div>
               
@@ -453,13 +558,24 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
                 className="mt-6"
+                style={{ opacity: activeFilter ? 0.7 : 1 }}
               >
-                <BarChart data={dashboardData.arrChangesByMonth} title="ARR Changes" />
+                <BarChart 
+                  data={filteredData.arrChangesByMonth} 
+                  title={activeFilter ? `ARR Changes (Filtered by ${activeFilter})` : "ARR Changes"} 
+                />
               </motion.div>
               
               <Tabs defaultValue="country" className="mt-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold">Geographic Distribution</h3>
+                  <h3 className="text-xl font-semibold">
+                    Geographic Distribution
+                    {activeFilter && (
+                      <span className="ml-2 text-sm text-muted-foreground">
+                        (Filtered by {activeFilter})
+                      </span>
+                    )}
+                  </h3>
                   <TabsList>
                     <TabsTrigger value="country">By Country</TabsTrigger>
                     <TabsTrigger value="state">By US State</TabsTrigger>
@@ -475,7 +591,7 @@ const Index = () => {
                     <MapChart 
                       data={countryMapData} 
                       geoType="world" 
-                      title="ARR by Country" 
+                      title={activeFilter ? `ARR by Country (${activeFilter})` : "ARR by Country"}
                     />
                   </TabsContent>
                   
@@ -483,7 +599,7 @@ const Index = () => {
                     <MapChart 
                       data={stateMapData} 
                       geoType="usa" 
-                      title="ARR by US State" 
+                      title={activeFilter ? `ARR by US State (${activeFilter})` : "ARR by US State"} 
                     />
                   </TabsContent>
                 </motion.div>
@@ -723,12 +839,23 @@ const Index = () => {
         </div>
         
         {userType === 'internal' && (
-          <CustomerFilter 
-            selectedCustomer={selectedCustomer}
-            selectedSalesRep={selectedSalesRep}
-            onCustomerChange={setSelectedCustomer}
-            onSalesRepChange={setSelectedSalesRep}
-          />
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <CustomerFilter 
+              selectedCustomer={selectedCustomer}
+              selectedSalesRep={selectedSalesRep}
+              onCustomerChange={setSelectedCustomer}
+              onSalesRepChange={setSelectedSalesRep}
+            />
+            
+            {activeFilter && (
+              <button 
+                onClick={() => setActiveFilter(null)}
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Clear "{activeFilter}" Filter
+              </button>
+            )}
+          </div>
         )}
         
         <DashboardNav 

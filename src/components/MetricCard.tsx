@@ -17,6 +17,7 @@ interface MetricCardProps {
   arrValue?: number;
   trend?: number;
   delay?: number;
+  className?: string;
 }
 
 const MetricCard = ({ 
@@ -27,7 +28,8 @@ const MetricCard = ({
   mrrValue, 
   arrValue, 
   trend = 0,
-  delay = 0
+  delay = 0,
+  className = ''
 }: MetricCardProps) => {
   // If this is a main card with only a count and trend
   const isMainCard = mrrChange === undefined;
@@ -38,7 +40,7 @@ const MetricCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
-      className={`data-card p-4 ${isMainCard ? 'bg-white rounded-lg shadow-sm' : ''}`}
+      className={`data-card p-4 ${isMainCard ? 'bg-white rounded-lg shadow-sm' : ''} ${className}`}
     >
       {isMainCard ? (
         <div className="flex flex-col items-start">
