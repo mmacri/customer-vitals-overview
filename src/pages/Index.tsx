@@ -434,7 +434,7 @@ const Index = () => {
                     label={dashboardData.upsellCustomers.label}
                     mrrChange={dashboardData.upsellCustomers.mrrChange}
                     mrrValue={dashboardData.upsellCustomers.mrrValue}
-                    arrValue={dashboardData.arrValue}
+                    arrValue={dashboardData.upsellCustomers.arrValue}
                   />
                 </motion.div>
                 
